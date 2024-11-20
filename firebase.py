@@ -34,21 +34,21 @@ user = auth.sign_in_with_email_and_password(email, password)
 print(user['localId'])
 
 # Gửi email đặt lại mật khẩu
-# auth.send_password_reset_email(email)
+auth.send_password_reset_email(email)
 
 # Lấy user_id từ email (trong Realtime Database)
-# user_id = next((id for id, data in db.child("users").get().val().items() if data["email"] == "docanhsm@gmail.com"), None)
-# if user_id:
-#     print("User ID is:", user_id)
+user_id = next((id for id, data in db.child("users").get().val().items() if data["email"] == "docanhsm@gmail.com"), None)
+if user_id:
+    print("User ID is:", user_id)
 
-# # Cập nhật thông tin người dùng
-# user_id = '1'  # Thay thế bằng user_id chính xác
-# data = {'email': 'docanhsm'}
-# db.child('users').child(user_id).update(data)
+# Cập nhật thông tin người dùng
+user_id = '1'  # Thay thế bằng user_id chính xác
+data = {'email': 'docanhsm'}
+db.child('users').child(user_id).update(data)
 
-# # Lấy thông tin người dùng từ Realtime Database
-# user = db.child('users').child(user_id).get()
-# print(user.val())  # OrderedDict([('email', 'docanhsm'), ('name', 'dat')])
+# Lấy thông tin người dùng từ Realtime Database
+user = db.child('users').child(user_id).get()
+print(user.val())  # OrderedDict([('email', 'docanhsm'), ('name', 'dat')])
 
-# # In ra tên người dùng
-# print(user.val()['email'])  # docanhsm
+# In ra tên người dùng
+print(user.val()['email'])  # docanhsm

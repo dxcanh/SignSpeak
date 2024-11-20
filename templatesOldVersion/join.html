@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- icon -->
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <!-- socketio -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- jQuery UI -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"
+        integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- Popper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- google Material icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- custom css -->
+    <link rel="stylesheet" href="{{url_for('static', filename='custom.css')}}">
+    <script type="text/javascript">
+        window.myRoomID = "{{room_id}}";
+        window.myName = "{{display_name}}";
+        var audioMuted = "{{mute_audio}}" == "1";
+        var videoMuted = "{{mute_video}}" == "1";
+        console.log(">> {{mute_audio}}, {{mute_video}}", audioMuted, videoMuted);
+        console.log("myName",window.myName);
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Chat [{{room_id}}]</title>
+</head>
+<body>
+    <div id="video_grid" class="video-grid"></div>
+    <div id = "Waiting_img_container">
+        <img id ="Waiting_img" src = "{{url_for('static', filename='images/lounge.gif')}}" >
+    </div>
+    <video id="input_video" style="display:none" ></video>
+    <video id="local_vid" autoplay muted></video>
+    <div id ="mask_canvas" style="display: none;">文字認識領域</div>
+    
+    <canvas id="output_canvas" ></canvas>
+    <div id="button-container">
+        <button id="start-button">Start Landmarking</button>
+        <button id="stop-button">Stop Landmarking</button>
+        <button id="mute_icon">mic</button>
+        <button id="vid_mute_icon">videocam</button>
+    </div>
+    <div id ="signal_container" style="display: none;">
+        <div id="signal">
+            <div id="sub_signal">Waiting for signal</div>
+            <div id="progress-container" style="height: 20px; width: 100%; border: 2px solid black;">
+                <div id="progress-bar" style="height: 100%; width: 0%; background-color: green;"></div>
+            </div>
+        </div>
+    </div>
+    <div id="chat-window" >
+        <div id = "manager-task">
+            
+        </div>
+        <div id="toggle-button-container"> <!-- Nút ẩn hiện chat window -->
+        <button id="toggle-button" onclick="toggleChatWindow()" class="btn">
+            <span class="material-icons">arrow_forward_ios</span> <!-- Biểu tượng mũi tên -->
+        </button>
+        </div>
+        <div id = 'lowlayer-managertask'></div>
+        <div id="messages" class="mb-2" style="display:block;">
+            <div id="sticky-div">
+                <img id='logo-img' style="display: block;" src="{{url_for('static', filename='images/chatbot2.png')}}">
+              </div>
+        </div>
+        <div id="chat-input-container">
+            <textarea id="message-input" ></textarea>
+            <div id="send-button-container">
+                <button id="send-button" onclick="sendMessage()" class="btn btn-primary">
+                    <span class="material-icons">send</span> <!-- Biểu tượng mũi tên -->
+                </button>
+            </div>
+        </div>
+    </div>
+    <script src="{{url_for('static', filename='video-manager.js')}}"></script>
+    <script src="{{url_for('static', filename='chatroom_ui.js')}}"></script>
+    <script src="{{url_for('static', filename='chatroom_networking.js')}}"></script>
+    <script type="module" src="{{url_for('static', filename='main2.js')}}"></script>
+    <script src="{{url_for('static', filename='chatbox.js')}}"></script>
+    <script src="{{url_for('static',filename='support_js/drawing_utils.js')}}" crossorigin="anonymous"></script>
+    <script src="{{url_for('static',filename='support_js/hands.js')}}" crossorigin="anonymous"></script>
+    <script src="{{url_for('static',filename='support_js/vision_bundle.js')}}" crossorigin="anonymous"></script>
+    <script src="{{url_for('static',filename='support_js/socket.io.js')}}"></script>
+    <script src="{{url_for('static',filename='support_js/socket.io.min.js')}}"></script>    
+    <script>
+        socket.on('sentence', function(msg) {
+        if (msg.counter) {
+            if (msg.counter == '手話の認識をお待ちしています。' || msg.counter == '文字を認識中'){
+                if (msg.counter == '手話の認識をお待ちしています。' ){
+                document.getElementById('sub_signal').innerText = msg.counter;
+                document.getElementById('progress-bar').style.width = 0 + '%';
+            }else{
+                document.getElementById('sub_signal').innerText = msg.counter;
+                document.getElementById('progress-bar').style.width = 0 + '%';
+            }
+            }
+            else{
+            var frames_per_detect = 20;//số frames cần thiết trên một lần nhận diện 
+            var percentage = (100 / frames_per_detect) * msg.counter;
+            document.getElementById('sub_signal').innerText = percentage + '%';
+            document.getElementById('progress-bar').style.width = percentage + '%';
+            }
+        }
+        else {
+            console.log("msg.counter is undefined!");
+            // Xử lý trường hợp msg.sentence không được xác định tại đây
+        }
+        });
+    </script>
+</body>
+
+</html>
