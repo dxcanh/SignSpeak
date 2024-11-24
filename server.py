@@ -11,6 +11,7 @@ import pickle
 import pyrebase
 from functools import wraps
 from collections import Counter
+from tensorflow.keras.models import load_model
 
 
 tf.config.set_visible_devices([], 'GPU')
@@ -49,11 +50,14 @@ right_hand_landmarks_X_Y = []
 
 labels_dict = {0: 'た', 1: 'な', 2: 'か',3:'Enter',4:'Delete'}
 threshold = 0.9
-#Load model for detect character
-model_dict = pickle.load(open('./modelv2.p', 'rb'))
-model_char = model_dict['model']
+# #Load model for detect character
+# model_dict = pickle.load(open('./modelv2.p', 'rb'))
+# model_char = model_dict['model']
+model_char = load_model('webappmodelv3.h5')
 # Actions that we try to detect
-actions = np.array(['はじめまして', 'こんにちは', '私の名前は', 'ありがとうございます', 'と申します', 'よろしくおねがいします。'])
+actions = np.array(['xin chao rat vui duoc gap ban', 'tam biet hen gap lai', 'xin cam on ban that tot bung', 
+                    'toi xin loi ban co sao khong', 'toi yeu gia dinh va ban be', 'toi la hoc sinh', 
+                    'toi thich dong vat', 'toi an com', 'toi song o viet nam', 'toi la nguoi diec'])
 
 
 model = Sequential()
@@ -224,7 +228,7 @@ def handle_landmark_data():
                     right_hand_landmarks_X_Y.append(x - min(x_list))
                     right_hand_landmarks_X_Y.append(y - min(y_list))
                 # Lấy xác suất dự đoán cho từng lớp
-                proba_predictions = model_char.predict_proba([np.asarray(right_hand_landmarks_X_Y)])
+                proba_predictions = model_char.predict(np.asarray(right_hand_landmarks_X_Y).reshape(1, -1))
                 # print(proba_predictions)
                 right_hand_landmarks_X_Y = []
                 # Lấy xác suất dự đoán lớp có xác suất cao nhất
