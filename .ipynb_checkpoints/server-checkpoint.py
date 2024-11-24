@@ -163,17 +163,27 @@ def joinlink():
         return 'Please log in'
     
 @app.route("/join", methods=["GET"])
-@login_required 
 def join():
-    if 'localId' in session:
-        user = db.child('users').child(session['localId']).get()
-        display_name = user.val()['name']
-    mute_audio = request.args.get('mute_audio') # 1 or 0
-    mute_video = request.args.get('mute_video') # 1 or 0
+    user = db.child('users').child(session.get('localId')).get()
+
+    display_name = user.val().get('name', 'Unknown') if user.val() else 'Unknown'
+
+    mute_audio = request.args.get('mute_audio')  # 1 hoặc 0
+    mute_video = request.args.get('mute_video')  # 1 hoặc 0
     room_id = request.args.get('room_id')
-    session[room_id] = {"name": display_name,
-                        "mute_audio": mute_audio, "mute_video": mute_video}
-    return render_template("join.html", room_id=room_id, display_name=session[room_id]["name"], mute_audio=session[room_id]["mute_audio"], mute_video=session[room_id]["mute_video"])
+
+    session[room_id] = {
+        "name": display_name,
+        "mute_audio": mute_audio,
+        "mute_video": mute_video
+    }
+
+    return render_template("join.html", 
+                           room_id=room_id, 
+                           display_name=session[room_id]["name"], 
+                           mute_audio=session[room_id]["mute_audio"], 
+                           mute_video=session[room_id]["mute_video"])
+
 
 @app.route('/combined_landmark_endpoint', methods=['POST'])
 def handle_landmark_data():
@@ -372,4 +382,4 @@ def on_data(data):
 
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000, ssl_context=('cert.pem', 'key.pem'))
+    socketio.run(app, debug=True, host='0.0.0.0', port=8000, ssl_context=('cert.pem', 'key.pem'))
