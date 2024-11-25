@@ -287,7 +287,7 @@
         );
         const mute_audio = muteStatus.mute_audio;
         const mute_video = muteStatus.mute_video;
-        const url = `https://10.10.73.113:8000/${document
+        const url = `https://192.168.0.102:8000/${document
           .getElementById("confirmButton")
           .getAttribute(
             "action"
@@ -302,7 +302,7 @@
         let randomRoomId = Math.floor(Math.random() * 900000000) + 100000000;
         document.getElementById("room_id").value = randomRoomId;
         document.getElementById("copyInput").value =
-          'https://10.10.73.113:8000/joinlink?room_id=' + randomRoomId;
+          'https://192.168.0.102:8000/joinlink?room_id=' + randomRoomId;
         document.getElementById("roomWindow").style.display = "block";
         document.getElementById("createRoomButton").style.display = "None";
         document.getElementById("joinRoomButton").style.display = "None";

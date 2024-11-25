@@ -11,7 +11,7 @@ import pickle
 import pyrebase
 from functools import wraps
 from collections import Counter
-
+from flask_socketio import SocketIO
 
 tf.config.set_visible_devices([], 'GPU')
 app = Flask(__name__, static_folder='static')
@@ -32,7 +32,7 @@ app.config['SECRET_KEY'] = "SECRET_KEY"
 
 CORS(app)  
 
-socketio = SocketIO(app, cors_allowed_origins="*")  
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading", allow_eio3=True)
 
 users_in_room = {}
 rooms_sid = {}
@@ -93,6 +93,7 @@ def checkHandLandmarksCoordinates(x_array,y_array):
     maxY = max(y_array) * 320 #video height
     # print('maxX: ',maxX,'  maxY: ',maxY)
     return maxX <= 160 and maxY <= 160 and maxX > 0 and maxY > 0
+    
 @app.route('/', methods=['POST','GET'])
 def index():
 
@@ -127,6 +128,7 @@ def signup():
             print(e)
             return 'Failed to sign up'
     return render_template('signup.html')  
+    
 @app.route('/forgot_password', methods=['POST', 'GET'])
 def forgot_password():
     if request.method == 'POST':
@@ -164,26 +166,35 @@ def joinlink():
     
 @app.route("/join", methods=["GET"])
 def join():
-    user = db.child('users').child(session.get('localId')).get()
+    display_name = "Guest"  # Default name if not logged in
+    if 'localId' in session:
+        try:
+            user = db.child('users').child(session['localId']).get()
+            display_name = user.val()['name']
+        except Exception as e:
+            print(f"Error fetching user name: {e}")
+            display_name = "User"
 
-    display_name = user.val().get('name', 'Unknown') if user.val() else 'Unknown'
-
-    mute_audio = request.args.get('mute_audio')  # 1 hoặc 0
-    mute_video = request.args.get('mute_video')  # 1 hoặc 0
+    mute_audio = request.args.get('mute_audio', '0')  # 1 or 0
+    mute_video = request.args.get('mute_video', '0')  # 1 or 0
     room_id = request.args.get('room_id')
+
+    if not room_id:
+        return "Room ID is required", 400
 
     session[room_id] = {
         "name": display_name,
-        "mute_audio": mute_audio,
+        "mute_audio": mute_audio, 
         "mute_video": mute_video
     }
 
-    return render_template("join.html", 
-                           room_id=room_id, 
-                           display_name=session[room_id]["name"], 
-                           mute_audio=session[room_id]["mute_audio"], 
-                           mute_video=session[room_id]["mute_video"])
-
+    return render_template(
+        "join.html", 
+        room_id=room_id, 
+        display_name=session[room_id]["name"], 
+        mute_audio=session[room_id]["mute_audio"], 
+        mute_video=session[room_id]["mute_video"]
+    )
 
 @app.route('/combined_landmark_endpoint', methods=['POST'])
 def handle_landmark_data():
