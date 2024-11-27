@@ -167,34 +167,50 @@ def joinlink():
 @app.route("/join", methods=["GET"])
 def join():
     display_name = "Guest"  # Default name if not logged in
+    email = "Unknown"  # Default email if not found
+
+    # Kiểm tra nếu có 'localId' trong session
     if 'localId' in session:
         try:
+            # Lấy thông tin người dùng từ Firebase
             user = db.child('users').child(session['localId']).get()
-            display_name = user.val()['name']
+            if user.val():  # Kiểm tra nếu dữ liệu người dùng tồn tại
+                user_data = user.val()  # Lấy dữ liệu người dùng
+                display_name = user_data['name']  # Lấy tên người dùng
+                email = user_data['email']  # Lấy email người dùng
+            else:
+                display_name = "Unknown User"
         except Exception as e:
             print(f"Error fetching user name: {e}")
             display_name = "User"
 
-    mute_audio = request.args.get('mute_audio', '0')  # 1 or 0
-    mute_video = request.args.get('mute_video', '0')  # 1 or 0
+    # Lấy giá trị mute_audio và mute_video từ query params (mặc định là '0')
+    mute_audio = request.args.get('mute_audio', '0')  # 1 hoặc 0
+    mute_video = request.args.get('mute_video', '0')  # 1 hoặc 0
+
+    # Kiểm tra nếu room_id không tồn tại
     room_id = request.args.get('room_id')
-
     if not room_id:
-        return "Room ID is required", 400
+        return "Room ID is required", 400  # Nếu không có room_id, trả về lỗi 400
 
+    # Lưu thông tin phòng vào session
     session[room_id] = {
         "name": display_name,
-        "mute_audio": mute_audio, 
+        "email": email,  # Lưu cả email vào session
+        "mute_audio": mute_audio,
         "mute_video": mute_video
     }
 
+    # Trả về template với các tham số đã chuẩn bị
     return render_template(
         "join.html", 
         room_id=room_id, 
         display_name=session[room_id]["name"], 
+        email=session[room_id]["email"],  # Truyền email vào template
         mute_audio=session[room_id]["mute_audio"], 
         mute_video=session[room_id]["mute_video"]
     )
+
 
 @app.route('/combined_landmark_endpoint', methods=['POST'])
 def handle_landmark_data():
