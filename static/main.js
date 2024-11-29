@@ -89,7 +89,7 @@ const init = async () =>{
 
   let lastVideoTime = -1;
   // Lưu ý: Bạn có thể cần thay đổi địa chỉ URL tùy thuộc vào cài đặt của bạn.
-  const socket = io('https://10.0.10.170:8000/');
+  const socket = io('https://172.168.10.213:8000/');
   // const socket = io('http://127.0.0.1:6868/');
   const renderLoop = () => {
     canvasElement.width = video.videoWidth;
