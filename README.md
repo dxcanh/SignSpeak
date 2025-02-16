@@ -2,6 +2,8 @@
 
 SignSpeak is an innovative application that uses machine learning and computer vision techniques to translate sign language gestures into text. This tool is designed to break down communication barriers for the hearing-impaired community by allowing individuals who do not know sign language to understand it in text form. The app also offers real-time video calling and gesture recognition to help foster inclusivity and social integration.
 
+👉 [Watch demo](https://drive.google.com/file/d/1GVLLUMtz4-XqkPZvlil3vP0TYFLW2qge/view?usp=sharing)
+
 ## Table of Contents
 - [System Configuration](#system-configuration)
 - [Technologies Used](#technologies-used)
