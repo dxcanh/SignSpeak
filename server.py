@@ -16,14 +16,14 @@ from flask_socketio import SocketIO
 tf.config.set_visible_devices([], 'GPU')
 app = Flask(__name__, static_folder='static')
 config = {
-    "apiKey": "AIzaSyCOM6-zvV2OhCWM76NS0xYI2_mIsvcgpD4",
-    "authDomain": "signspeak-5b1bd.firebaseapp.com",
-    "projectId": "signspeak-5b1bd",
-    "storageBucket": "signspeak-5b1bd.firebasestorage.app",
-    "messagingSenderId": "605753446406",
-    "appId": "1:605753446406:web:fcc1e3734c65a5ab28f387",
-    "measurementId": "G-S6KTFVCY0W",
-    "databaseURL": "https://signspeak-5b1bd-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    "apiKey": "",
+    "authDomain": "",
+    "projectId": "",
+    "storageBucket": "",
+    "messagingSenderId": "",
+    "appId": "",
+    "measurementId": "",
+    "databaseURL": ""
 }
 firebase = pyrebase.initialize_app(config=config)
 auth = firebase.auth()
